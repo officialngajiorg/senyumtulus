@@ -127,8 +127,11 @@ export async function submitPostForModeration(
         await createPost(newPostData);
         
         console.log("[Forum Action MongoDB] New thread and post saved to MongoDB.");
+        
+        // Revalidate paths to refresh data from MongoDB
         revalidatePath('/forum');
         revalidatePath(`/forum/${newThreadId}`);
+        revalidatePath('/'); // If forum data is shown on homepage
 
         return {
           success: true,
@@ -160,7 +163,10 @@ export async function submitPostForModeration(
         await updateThreadActivity(threadId, currentDate);
 
         console.log("[Forum Action MongoDB] New reply saved to MongoDB.");
+        
+        // Revalidate paths to refresh data from MongoDB
         revalidatePath(`/forum/${threadId}`);
+        revalidatePath('/forum');
 
         return {
           success: true,

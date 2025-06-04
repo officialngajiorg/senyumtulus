@@ -82,6 +82,7 @@ export async function getAllThreads(): Promise<Thread[]> {
     const threadsCollection = db.collection<Thread>('threads');
     
     const threads = await threadsCollection.find({}).sort({ lastActivity: -1 }).toArray();
+    console.log(`[MongoDB] Retrieved ${threads.length} threads`);
     return threads;
   } catch (error) {
     console.error('[MongoDB] Error getting all threads:', error);
@@ -95,9 +96,28 @@ export async function getPostsByThreadId(threadId: string): Promise<Post[]> {
     const postsCollection = db.collection<Post>('posts');
     
     const posts = await postsCollection.find({ threadId }).sort({ timestamp: 1 }).toArray();
+    console.log(`[MongoDB] Retrieved ${posts.length} posts for thread ${threadId}`);
     return posts;
   } catch (error) {
     console.error('[MongoDB] Error getting posts by thread ID:', error);
     throw new Error('Failed to get posts from database');
+  }
+}
+
+export async function getThreadStats(): Promise<{ totalThreads: number; totalPosts: number }> {
+  try {
+    const db = await getDatabase();
+    const threadsCollection = db.collection<Thread>('threads');
+    const postsCollection = db.collection<Post>('posts');
+    
+    const [totalThreads, totalPosts] = await Promise.all([
+      threadsCollection.countDocuments(),
+      postsCollection.countDocuments()
+    ]);
+    
+    return { totalThreads, totalPosts };
+  } catch (error) {
+    console.error('[MongoDB] Error getting thread stats:', error);
+    return { totalThreads: 0, totalPosts: 0 };
   }
 }

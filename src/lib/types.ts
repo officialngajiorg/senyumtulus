@@ -1,4 +1,3 @@
-
 // No longer importing Timestamp from firebase/firestore
 
 // User information stored with posts/threads (denormalized)
@@ -78,3 +77,9 @@ export type PostSubmissionResult = {
   submittedContent?: { title?: string; content: string; userId?: string; userName?: string; userAvatarUrl?: string; threadId?: string; };
   errorFields?: { [key: string]: string };
 };
+
+export interface ForumData {
+  threads: Thread[];
+  totalThreads: number;
+  totalPosts: number;
+}
