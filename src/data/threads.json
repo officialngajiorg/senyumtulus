@@ -1,0 +1,51 @@
+[
+  {
+    "id": "8659e64f-6b88-45bb-a36b-465a8d5af4bb",
+    "title": "note note note note note note note note note note note ",
+    "author": {
+      "userId": "user-aku-suka-ngaji-1749030598269",
+      "name": "aku suka ngaji",
+      "avatarUrl": "https://placehold.co/100x100.png?text=AK"
+    },
+    "originalPostContent": "note note note note note note note note note note note note ",
+    "originalPostId": "a680e03b-f5eb-4871-85c7-cb2ced8c42cd",
+    "createdAt": "2025-06-04T10:07:29.614Z",
+    "lastActivity": "2025-06-04T10:07:29.614Z",
+    "replyCount": 0,
+    "viewCount": 0
+  },
+  {
+    "id": "thread1-mock",
+    "title": "Baru Didiagnosis CBL - Mohon Pencerahan (JSON Data)",
+    "author": {
+      "userId": "user1-mock",
+      "name": "Budi Santoso",
+      "avatarUrl": "https://placehold.co/100x100.png?text=BS"
+    },
+    "originalPostContent": "Halo semua, anak saya baru saja didiagnosis CBL. Ada saran untuk langkah awal? (Data dari JSON)",
+    "originalPostId": "post1-mock",
+    "createdAt": "2024-07-28T10:00:00.000Z",
+    "lastActivity": "2024-07-28T12:30:00.000Z",
+    "replyCount": 1,
+    "viewCount": 120,
+    "isLocked": false,
+    "isPinned": false
+  },
+  {
+    "id": "thread2-mock",
+    "title": "Sharing Pengalaman Operasi Tahap Pertama (JSON Data)",
+    "author": {
+      "userId": "user2-mock",
+      "name": "Citra Lestari",
+      "avatarUrl": "https://placehold.co/100x100.png?text=CL"
+    },
+    "originalPostContent": "Pengalaman saya dengan operasi tahap pertama cukup menantang tapi hasilnya luar biasa. (Data dari JSON)",
+    "originalPostId": "post2-mock",
+    "createdAt": "2024-07-27T14:00:00.000Z",
+    "lastActivity": "2024-07-27T14:00:00.000Z",
+    "replyCount": 0,
+    "viewCount": 75,
+    "isLocked": false,
+    "isPinned": true
+  }
+]

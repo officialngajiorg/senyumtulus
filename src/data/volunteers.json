@@ -1,0 +1,45 @@
+
+[
+  {
+    "id": "volunteer1-mock",
+    "name": "Dr. Rina Wijaya",
+    "province": "DKI Jakarta",
+    "city": "Jakarta Selatan",
+    "contact": { "email": "rina.wijaya@example.com", "whatsapp": "081234567890" },
+    "experience": "Dokter anak spesialis bedah plastik rekonstruksi, 10 tahun pengalaman menangani kasus CBL.",
+    "specialization": ["Bedah Plastik", "Konseling Pra-Operasi"],
+    "availability": "Senin-Jumat, jam kerja",
+    "avatarUrl": "https://placehold.co/100x100.png?text=RW",
+    "bannerUrl": "https://placehold.co/1200x300.png",
+    "bio": "Berdedikasi untuk membantu anak-anak CBL mendapatkan senyum terbaik mereka. Aktif dalam kegiatan sosial dan penelitian terkait CBL.",
+    "socialMedia": { "linkedin": "#" }
+  },
+  {
+    "id": "volunteer2-mock",
+    "name": "Andi Pratama",
+    "province": "Jawa Barat",
+    "city": "Bandung",
+    "contact": { "email": "andi.pratama@example.com" },
+    "experience": "Ayah dari anak dengan CBL usia 5 tahun. Aktif berbagi pengalaman dan dukungan moral.",
+    "specialization": ["Dukungan Emosional", "Parenting CBL"],
+    "availability": "Fleksibel,utamakan akhir pekan",
+    "avatarUrl": "https://placehold.co/100x100.png?text=AP",
+    "bannerUrl": "https://placehold.co/1200x300.png",
+    "bio": "Saya percaya berbagi pengalaman adalah kekuatan. Siap mendengarkan dan memberikan dukungan untuk sesama pejuang senyum.",
+    "socialMedia": { "facebook": "#", "instagram": "#" }
+  },
+  {
+    "id": "volunteer3-mock",
+    "name": "Siti Aminah",
+    "province": "Jawa Timur",
+    "city": "Surabaya",
+    "contact": { "whatsapp": "087654321098" },
+    "experience": "Terapis wicara dengan fokus pada anak-anak berkebutuhan khusus, termasuk CBL, selama 7 tahun.",
+    "specialization": ["Terapi Wicara", "Terapi Oral Motor"],
+    "availability": "Sesuai perjanjian",
+    "avatarUrl": "https://placehold.co/100x100.png?text=SA",
+    "bannerUrl": "https://placehold.co/1200x300.png",
+    "bio": "Membantu anak-anak berkomunikasi dengan lebih baik adalah passion saya. Menyediakan sesi konsultasi dan terapi.",
+    "socialMedia": {}
+  }
+]

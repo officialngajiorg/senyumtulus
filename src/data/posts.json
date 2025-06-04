@@ -1,0 +1,62 @@
+[
+  {
+    "id": "a680e03b-f5eb-4871-85c7-cb2ced8c42cd",
+    "threadId": "8659e64f-6b88-45bb-a36b-465a8d5af4bb",
+    "author": {
+      "userId": "user-aku-suka-ngaji-1749030598269",
+      "name": "aku suka ngaji",
+      "avatarUrl": "https://placehold.co/100x100.png?text=AK"
+    },
+    "content": "note note note note note note note note note note note note ",
+    "timestamp": "2025-06-04T10:07:29.614Z",
+    "likes": 0,
+    "reports": 0
+  },
+  {
+    "id": "post1-mock",
+    "threadId": "thread1-mock",
+    "author": {
+      "userId": "user1-mock",
+      "name": "Budi Santoso",
+      "avatarUrl": "https://placehold.co/100x100.png?text=BS"
+    },
+    "content": "Halo semua, anak saya baru saja didiagnosis CBL. Ada saran untuk langkah awal? (Data dari JSON)",
+    "timestamp": "2024-07-28T10:00:00.000Z",
+    "likes": 15,
+    "reports": 0,
+    "attachments": [
+      {
+        "type": "image",
+        "url": "https://placehold.co/600x400.png",
+        "name": "Foto USG.jpg",
+        "hint": "medical ultrasound"
+      }
+    ]
+  },
+  {
+    "id": "post1-reply1-mock",
+    "threadId": "thread1-mock",
+    "author": {
+      "userId": "user2-mock",
+      "name": "Citra Lestari",
+      "avatarUrl": "https://placehold.co/100x100.png?text=CL"
+    },
+    "content": "Pak Budi, tetap tenang ya. Langkah pertama biasanya konsultasi dengan tim dokter spesialis. (Data dari JSON)",
+    "timestamp": "2024-07-28T12:30:00.000Z",
+    "likes": 8,
+    "reports": 0
+  },
+  {
+    "id": "post2-mock",
+    "threadId": "thread2-mock",
+    "author": {
+      "userId": "user2-mock",
+      "name": "Citra Lestari",
+      "avatarUrl": "https://placehold.co/100x100.png?text=CL"
+    },
+    "content": "Pengalaman saya dengan operasi tahap pertama cukup menantang tapi hasilnya luar biasa. (Data dari JSON)",
+    "timestamp": "2024-07-27T14:00:00.000Z",
+    "likes": 22,
+    "reports": 0
+  }
+]

@@ -1,0 +1,108 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'PT Sans', sans-serif; /* Fallback, primary font set in layout */
+}
+
+@layer base {
+  :root {
+    --background: 210 20% 96.1%; /* #F0F4F8 Light Gray */
+    --foreground: 210 10% 23%; /* Dark Gray for text */
+
+    --card: 210 20% 100%; /* White */
+    --card-foreground: 210 10% 23%;
+
+    --popover: 210 20% 100%;
+    --popover-foreground: 210 10% 23%;
+
+    --primary: 207 87% 68%; /* #64B5F6 Soft Blue */
+    --primary-foreground: 210 20% 98%; /* Light color for text on primary */
+
+    --secondary: 210 15% 90%; /* Slightly darker gray for secondary elements */
+    --secondary-foreground: 210 10% 23%;
+
+    --muted: 210 15% 85%;
+    --muted-foreground: 210 10% 40%;
+
+    --accent: 33 100% 62%; /* #FFAB40 Warm Orange */
+    --accent-foreground: 210 10% 23%; /* Dark text on accent */
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 210 10% 88%;
+    --input: 210 10% 88%;
+    --ring: 207 87% 68%; /* Primary color for rings */
+
+    --radius: 0.5rem;
+
+    /* Sidebar specific colors, can be adjusted if a sidebar is heavily used */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    /* Define dark theme colors if needed, for now, focusing on light theme */
+    --background: 210 10% 15%;
+    --foreground: 210 20% 96.1%;
+
+    --card: 210 10% 20%;
+    --card-foreground: 210 20% 96.1%;
+
+    --popover: 210 10% 20%;
+    --popover-foreground: 210 20% 96.1%;
+
+    --primary: 207 87% 68%;
+    --primary-foreground: 210 10% 10%;
+
+    --secondary: 210 10% 25%;
+    --secondary-foreground: 210 20% 96.1%;
+
+    --muted: 210 10% 25%;
+    --muted-foreground: 210 15% 70%;
+
+    --accent: 33 100% 62%;
+    --accent-foreground: 210 10% 10%;
+
+    --destructive: 0 72.2% 50.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 210 10% 30%;
+    --input: 210 10% 30%;
+    --ring: 207 87% 68%;
+    
+    /* Dark Sidebar specific colors */
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    @apply antialiased;
+  }
+  .font-headline {
+    font-family: var(--font-headline), sans-serif;
+  }
+  .font-body {
+    font-family: var(--font-body), sans-serif;
+  }
+}

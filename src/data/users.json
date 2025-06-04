@@ -1,0 +1,6 @@
+
+[
+  { "id": "user1-mock", "name": "Budi Santoso", "email": "budi@example.com", "avatarUrl": "https://placehold.co/100x100.png?text=BS" },
+  { "id": "user2-mock", "name": "Citra Lestari", "email": "citra@example.com", "avatarUrl": "https://placehold.co/100x100.png?text=CL" },
+  { "id": "user-default", "name": "Guest User", "email": "guest@example.com" }
+]
