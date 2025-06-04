@@ -1,10 +1,9 @@
-
 // src/lib/actions/forumActions.ts
 'use server';
 import { moderateForumContent, type ModerateForumContentInput } from '@/ai/flows/moderate-forum-content';
 import { z } from 'zod';
 import type { PostSubmissionResult, AuthorInfo, Thread, Post } from '@/lib/types';
-import { readJsonFile, writeJsonFile, generateId } from '@/lib/json-utils'; // Using JSON utils
+import { createThread, createPost, updateThreadActivity, getThreadById, generateId } from '@/lib/mongodb-utils';
 import { revalidatePath } from 'next/cache';
 
 // Schema for new thread creation from FormData - VALIDATION DISABLED FOR TITLE AND CONTENT LENGTH
@@ -30,7 +29,7 @@ export async function submitPostForModeration(
   prevState: PostSubmissionResult | null,
   formData: FormData
 ): Promise<PostSubmissionResult> {
-  console.log("[Forum Action JSON] Received form data submission.");
+  console.log("[Forum Action MongoDB] Received form data submission.");
 
   const isNewThread = formData.has('title');
   
@@ -39,20 +38,19 @@ export async function submitPostForModeration(
     content: formData.get('content') as string,
     userId: formData.get('userId') as string,
     userName: formData.get('userName') as string,
-    userAvatarUrl: (formData.get('userAvatarUrl') as string | null) || '', // Ensure it's a string for Zod, or empty string
+    userAvatarUrl: (formData.get('userAvatarUrl') as string | null) || '',
     threadId: isNewThread ? undefined : formData.get('threadId') as string,
   };
-  console.log("[Forum Action JSON] Raw form data:", rawFormData);
+  console.log("[Forum Action MongoDB] Raw form data:", rawFormData);
   
   const validationSchema = isNewThread ? NewThreadFormSchema : ReplyFormSchema;
-  // Ensure userAvatarUrl is correctly handled for Zod (empty string is fine if optional and nullable or literal empty)
   const validatedFields = validationSchema.safeParse({
     ...rawFormData,
     userAvatarUrl: rawFormData.userAvatarUrl === "" ? null : rawFormData.userAvatarUrl,
   });
 
   if (!validatedFields.success) {
-    console.warn("[Forum Action JSON] Validation failed:", validatedFields.error.flatten().fieldErrors);
+    console.warn("[Forum Action MongoDB] Validation failed:", validatedFields.error.flatten().fieldErrors);
     const errorFields: { [key: string]: string } = {};
     validatedFields.error.errors.forEach(err => {
       if (err.path[0]) {
@@ -67,7 +65,7 @@ export async function submitPostForModeration(
     };
   }
   
-  console.log("[Forum Action JSON] Validated fields:", validatedFields.data);
+  console.log("[Forum Action MongoDB] Validated fields:", validatedFields.data);
   const { content, userId, userName } = validatedFields.data;
   const userAvatarForAuthor = validatedFields.data.userAvatarUrl === null || validatedFields.data.userAvatarUrl === "" ? undefined : validatedFields.data.userAvatarUrl;
 
@@ -76,13 +74,13 @@ export async function submitPostForModeration(
     name: userName,
     avatarUrl: userAvatarForAuthor,
   };
-  console.log("[Forum Action JSON] AuthorInfo:", authorInfo);
+  console.log("[Forum Action MongoDB] AuthorInfo:", authorInfo);
 
   try {
     const moderationInput: ModerateForumContentInput = { content: content };
-    console.log("[Forum Action JSON] Moderation input:", moderationInput);
+    console.log("[Forum Action MongoDB] Moderation input:", moderationInput);
     const moderationResult = await moderateForumContent(moderationInput);
-    console.log("[Forum Action JSON] Moderation result:", moderationResult);
+    console.log("[Forum Action MongoDB] Moderation result:", moderationResult);
 
     if (!moderationResult.isAppropriate) {
       return {
@@ -93,29 +91,14 @@ export async function submitPostForModeration(
       };
     }
 
-    // Content is appropriate, save to JSON files
+    // Content is appropriate, save to MongoDB
     const currentDate = new Date().toISOString();
 
     if (isNewThread && validatedFields.data.title) { // New Thread
-      console.log("[Forum Action JSON] Attempting to save new thread to JSON...");
+      console.log("[Forum Action MongoDB] Attempting to save new thread to MongoDB...");
       
-      const threads = readJsonFile<Thread>('threads.json');
-      const posts = readJsonFile<Post>('posts.json');
-
-      const newPostId = generateId();
       const newThreadId = generateId();
-
-      const newPostData: Post = {
-        id: newPostId,
-        threadId: newThreadId, 
-        author: authorInfo,
-        content: validatedFields.data.content,
-        timestamp: currentDate,
-        likes: 0,
-        reports: 0,
-        // attachments handling can be added later
-      };
-      posts.unshift(newPostData); // Add to the beginning for chronological order (newest first)
+      const newPostId = generateId();
 
       const newThreadData: Thread = {
         id: newThreadId,
@@ -128,36 +111,42 @@ export async function submitPostForModeration(
         replyCount: 0,
         viewCount: 0, 
       };
-      threads.unshift(newThreadData); // Add to the beginning
 
-      const postsWritten = writeJsonFile<Post>('posts.json', posts);
-      const threadsWritten = writeJsonFile<Thread>('threads.json', threads);
-      
-      if (!postsWritten || !threadsWritten) {
-        throw new Error("Failed to write data to JSON files.");
-      }
-      
-      console.log("[Forum Action JSON] New thread and post saved to JSON.");
-      revalidatePath('/forum'); // Revalidate forum page
-      revalidatePath(`/forum/${newThreadId}`); // Revalidate new thread page
-
-      return {
-        success: true,
-        message: 'Thread submitted successfully!',
-        newThreadId: newThreadId,
-        moderation: moderationResult,
-        submittedContent: { ...validatedFields.data, title: validatedFields.data.title || undefined },
+      const newPostData: Omit<Post, 'id'> = {
+        threadId: newThreadId, 
+        author: authorInfo,
+        content: validatedFields.data.content,
+        timestamp: currentDate,
+        likes: 0,
+        reports: 0,
       };
+
+      // Use transaction-like approach - create thread first, then post
+      try {
+        await createThread(newThreadData);
+        await createPost(newPostData);
+        
+        console.log("[Forum Action MongoDB] New thread and post saved to MongoDB.");
+        revalidatePath('/forum');
+        revalidatePath(`/forum/${newThreadId}`);
+
+        return {
+          success: true,
+          message: 'Thread submitted successfully!',
+          newThreadId: newThreadId,
+          moderation: moderationResult,
+          submittedContent: { ...validatedFields.data, title: validatedFields.data.title || undefined },
+        };
+      } catch (dbError: any) {
+        console.error("[Forum Action MongoDB] Database error creating thread/post:", dbError);
+        throw new Error(`Database operation failed: ${dbError.message}`);
+      }
 
     } else if (!isNewThread && (validatedFields.data as any).threadId) { // New Reply
       const threadId = (validatedFields.data as any).threadId;
-      console.log(`[Forum Action JSON] Attempting to save new reply to thread ${threadId} in JSON...`);
+      console.log(`[Forum Action MongoDB] Attempting to save new reply to thread ${threadId} in MongoDB...`);
       
-      const posts = readJsonFile<Post>('posts.json');
-      const threads = readJsonFile<Thread>('threads.json');
-
-      const newReplyData: Post = {
-        id: generateId(),
+      const newReplyData: Omit<Post, 'id'> = {
         threadId: threadId,
         author: authorInfo,
         content: validatedFields.data.content,
@@ -165,45 +154,45 @@ export async function submitPostForModeration(
         likes: 0,
         reports: 0,
       };
-      posts.unshift(newReplyData);
 
-      // Update thread lastActivity and replyCount
-      const threadIndex = threads.findIndex(t => t.id === threadId);
-      if (threadIndex > -1) {
-        threads[threadIndex].lastActivity = currentDate;
-        threads[threadIndex].replyCount += 1;
-      } else {
-        console.warn(`[Forum Action JSON] Thread with ID ${threadId} not found for updating reply count.`);
+      try {
+        await createPost(newReplyData);
+        await updateThreadActivity(threadId, currentDate);
+
+        console.log("[Forum Action MongoDB] New reply saved to MongoDB.");
+        revalidatePath(`/forum/${threadId}`);
+
+        return {
+          success: true,
+          message: 'Reply submitted successfully!',
+          moderation: moderationResult,
+          submittedContent: { ...validatedFields.data, threadId: (validatedFields.data as any).threadId || undefined },
+        };
+      } catch (dbError: any) {
+        console.error("[Forum Action MongoDB] Database error creating reply:", dbError);
+        throw new Error(`Database operation failed: ${dbError.message}`);
       }
-      
-      const postsWritten = writeJsonFile<Post>('posts.json', posts);
-      const threadsWritten = writeJsonFile<Thread>('threads.json', threads);
-
-      if (!postsWritten || !threadsWritten) {
-        throw new Error("Failed to write reply data to JSON files.");
-      }
-
-      console.log("[Forum Action JSON] New reply saved to JSON.");
-      revalidatePath(`/forum/${threadId}`); // Revalidate thread page
-
-      return {
-        success: true,
-        message: 'Reply submitted successfully!',
-        moderation: moderationResult,
-        submittedContent: { ...validatedFields.data, threadId: (validatedFields.data as any).threadId || undefined },
-      };
     } else {
-      console.error("[Forum Action JSON] Invalid form submission type or missing required fields for JSON operation.");
+      console.error("[Forum Action MongoDB] Invalid form submission type or missing required fields for MongoDB operation.");
       return { success: false, message: "Invalid form submission type or missing required fields." };
     }
 
   } catch (error: any) {
-    console.error("[Forum Action JSON] ERROR:", error);
-    console.error("[Forum Action JSON] Error message:", error.message);
-    console.error("[Forum Action JSON] Error stack:", error.stack);
+    console.error("[Forum Action MongoDB] ERROR:", error);
+    console.error("[Forum Action MongoDB] Error message:", error.message);
+    console.error("[Forum Action MongoDB] Error stack:", error.stack);
+    
+    // More specific error messages
+    let errorMessage = "An error occurred while submitting your post. Please try again later.";
+    if (error.message?.includes('Database operation failed')) {
+      errorMessage = "Database connection error. Please check your internet connection and try again.";
+    } else if (error.message?.includes('moderation')) {
+      errorMessage = "Content moderation service is temporarily unavailable. Please try again later.";
+    }
+    
     return {
       success: false,
-      message: error.message || `An error occurred while submitting your post. Please try again later.`,
+      message: errorMessage,
       submittedContent: { ...validatedFields.data, title: (validatedFields.data as any).title || undefined, threadId: (validatedFields.data as any).threadId || undefined },
     };
   }
