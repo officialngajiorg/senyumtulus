@@ -1,4 +1,3 @@
-
 "use client"; 
 import React, { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,8 @@ import ThreadItem from '@/components/forum/ThreadItem';
 import type { Thread } from '@/lib/types';
 import Link from 'next/link';
 import { PlusCircle, Search, MessageSquare, Loader2, Frown } from 'lucide-react';
+import { getForumThreads } from '@/lib/actions/forumActions';
+
 // Removed Firestore imports, will read from JSON later if needed or use client-side mock data
 
 // Mock data directly in the component for now, or fetch from a JSON file via an API route/server component
@@ -41,8 +42,9 @@ async function fetchThreadsFromLocal(): Promise<Thread[]> {
 }
 
 
-export default function ForumPage() {
-  const [allThreads, setAllThreads] = useState<Thread[]>([]);
+export default async function ForumPage() {
+  const threads = await getForumThreads();
+  const [allThreads, setAllThreads] = useState<Thread[]>(threads);
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   // Pagination state (can be re-added if reading from a paginated JSON source)

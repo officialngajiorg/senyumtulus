@@ -271,3 +271,63 @@ export async function getForumStats() {
     return { totalThreads: 0, totalPosts: 0 };
   }
 }
+
+export async function searchThreads(query: string) {
+  try {
+    console.log(`[Forum Action MongoDB] Searching threads with query: ${query}`);
+    const { getDatabase } = await import('@/lib/mongodb');
+    const db = await getDatabase();
+    const threadsCollection = db.collection('threads');
+    
+    const threads = await threadsCollection.find({
+      $or: [
+        { title: { $regex: query, $options: 'i' } },
+        { originalPostContent: { $regex: query, $options: 'i' } }
+      ]
+    }).sort({ lastActivity: -1 }).toArray();
+    
+    console.log(`[Forum Action MongoDB] Found ${threads.length} threads matching query`);
+    return threads;
+  } catch (error) {
+    console.error("[Forum Action MongoDB] Error searching threads:", error);
+    return [];
+  }
+}
+
+export async function getThreadsPaginated(page: number = 1, limit: number = 10) {
+  try {
+    console.log(`[Forum Action MongoDB] Getting threads page ${page}, limit ${limit}`);
+    const { getDatabase } = await import('@/lib/mongodb');
+    const db = await getDatabase();
+    const threadsCollection = db.collection('threads');
+    
+    const skip = (page - 1) * limit;
+    const threads = await threadsCollection
+      .find({})
+      .sort({ lastActivity: -1 })
+      .skip(skip)
+      .limit(limit)
+      .toArray();
+    
+    const total = await threadsCollection.countDocuments();
+    
+    return {
+      threads,
+      totalThreads: total,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      hasNextPage: page * limit < total,
+      hasPrevPage: page > 1
+    };
+  } catch (error) {
+    console.error("[Forum Action MongoDB] Error getting paginated threads:", error);
+    return {
+      threads: [],
+      totalThreads: 0,
+      currentPage: 1,
+      totalPages: 0,
+      hasNextPage: false,
+      hasPrevPage: false
+    };
+  }
+}

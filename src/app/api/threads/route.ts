@@ -1,12 +1,10 @@
-
 // src/app/api/threads/route.ts
 import { NextResponse } from 'next/server';
-import { readJsonFile } from '@/lib/json-utils';
-import type { Thread } from '@/lib/types';
+import { getForumThreads } from '@/lib/actions/forumActions';
 
 export async function GET() {
   try {
-    const threads = readJsonFile<Thread>('threads.json');
+    const threads = await getForumThreads();
     // Ensure dates are ISO strings if they aren't already
     const processedThreads = threads.map(thread => ({
       ...thread,
@@ -15,7 +13,7 @@ export async function GET() {
     }));
     return NextResponse.json(processedThreads);
   } catch (error) {
-    console.error('Error fetching threads:', error);
+    console.error('Error fetching threads from MongoDB:', error);
     return NextResponse.json({ message: 'Error fetching threads' }, { status: 500 });
   }
 }

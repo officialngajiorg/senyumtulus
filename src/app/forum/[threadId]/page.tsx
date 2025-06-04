@@ -1,4 +1,3 @@
-
 // src/app/forum/[threadId]/page.tsx
 import ForumPost from '@/components/forum/ForumPost';
 import NewReplyForm from '@/components/forum/NewReplyForm';
@@ -11,34 +10,10 @@ import { ArrowLeft, MessageSquare } from 'lucide-react';
 import UserAvatar from '@/components/shared/UserAvatar';
 import { format } from 'date-fns';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { readJsonFile } from '@/lib/json-utils'; // Using JSON utils
-
-async function getThreadById(id: string): Promise<Thread | undefined> {
-  const threads = readJsonFile<Thread>('threads.json');
-  const thread = threads.find(t => t.id === id);
-  if (thread) {
-    return {
-      ...thread,
-      createdAt: new Date(thread.createdAt), // Convert ISO string to Date
-      lastActivity: new Date(thread.lastActivity), // Convert ISO string to Date
-    } as Thread; // Cast to ensure Date types are used internally by the component
-  }
-  return undefined;
-}
-
-async function getPostsForThread(threadId: string): Promise<PostType[]> {
-  const allPosts = readJsonFile<PostType>('posts.json');
-  const threadPosts = allPosts.filter(p => p.threadId === threadId)
-    .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-  
-  return threadPosts.map(post => ({
-    ...post,
-    timestamp: new Date(post.timestamp), // Convert ISO string to Date
-  })) as PostType[]; // Cast to ensure Date types
-}
+import { getThreadWithPosts } from '@/lib/actions/forumActions';
 
 export default async function ThreadPage({ params }: { params: { threadId: string } }) {
-  const thread = await getThreadById(params.threadId);
+  const { thread, posts } = await getThreadWithPosts(params.threadId);
 
   if (!thread) {
     return (
@@ -56,9 +31,8 @@ export default async function ThreadPage({ params }: { params: { threadId: strin
     );
   }
 
-  const allPosts = await getPostsForThread(params.threadId);
-  const originalPost = allPosts.find(p => p.id === thread.originalPostId);
-  const replies = allPosts.filter(p => p.id !== thread.originalPostId);
+  const originalPost = posts.find(p => p.id === thread.originalPostId);
+  const replies = posts.filter(p => p.id !== thread.originalPostId);
 
   return (
     <div className="space-y-6">
@@ -75,8 +49,7 @@ export default async function ThreadPage({ params }: { params: { threadId: strin
             <UserAvatar user={{ name: thread.author.name, avatarUrl: thread.author.avatarUrl, id: thread.author.userId }} className="h-6 w-6" />
             <span>By {thread.author.name}</span>
             <span>•</span>
-            {/* Ensure createdAt is a Date before formatting */}
-            <span>{thread.createdAt instanceof Date ? format(thread.createdAt, "MMM d, yyyy") : 'Invalid Date'}</span>
+            <span>{format(new Date(thread.createdAt), "MMM d, yyyy")}</span>
             <span>•</span>
             <MessageSquare className="h-4 w-4 inline-block mr-1" /> {thread.replyCount} replies
           </div>
