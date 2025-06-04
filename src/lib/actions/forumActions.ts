@@ -203,3 +203,71 @@ export async function submitPostForModeration(
     };
   }
 }
+
+// Add these new functions for reading data from MongoDB
+export async function getForumThreads() {
+  try {
+    console.log("[Forum Action MongoDB] Getting all threads from MongoDB");
+    const { getAllThreads } = await import('@/lib/mongodb-utils');
+    const threads = await getAllThreads();
+    console.log(`[Forum Action MongoDB] Retrieved ${threads.length} threads from MongoDB`);
+    return threads;
+  } catch (error) {
+    console.error("[Forum Action MongoDB] Error getting threads:", error);
+    return [];
+  }
+}
+
+export async function getThreadWithPosts(threadId: string) {
+  try {
+    console.log(`[Forum Action MongoDB] Getting thread ${threadId} with posts from MongoDB`);
+    const { getThreadById, getPostsByThreadId } = await import('@/lib/mongodb-utils');
+    
+    const [thread, posts] = await Promise.all([
+      getThreadById(threadId),
+      getPostsByThreadId(threadId)
+    ]);
+    
+    if (!thread) {
+      console.warn(`[Forum Action MongoDB] Thread ${threadId} not found in MongoDB`);
+      return { thread: null, posts: [] };
+    }
+    
+    // Increment view count
+    try {
+      const { getDatabase } = await import('@/lib/mongodb');
+      const db = await getDatabase();
+      const threadsCollection = db.collection('threads');
+      await threadsCollection.updateOne(
+        { id: threadId },
+        { $inc: { viewCount: 1 } }
+      );
+    } catch (viewError) {
+      console.warn("[Forum Action MongoDB] Failed to increment view count:", viewError);
+    }
+    
+    console.log(`[Forum Action MongoDB] Retrieved thread ${threadId} with ${posts.length} posts from MongoDB`);
+    return { thread, posts };
+  } catch (error) {
+    console.error(`[Forum Action MongoDB] Error getting thread ${threadId}:`, error);
+    return { thread: null, posts: [] };
+  }
+}
+
+export async function getForumStats() {
+  try {
+    console.log("[Forum Action MongoDB] Getting forum stats from MongoDB");
+    const { getDatabase } = await import('@/lib/mongodb');
+    const db = await getDatabase();
+    
+    const [totalThreads, totalPosts] = await Promise.all([
+      db.collection('threads').countDocuments(),
+      db.collection('posts').countDocuments()
+    ]);
+    
+    return { totalThreads, totalPosts };
+  } catch (error) {
+    console.error("[Forum Action MongoDB] Error getting forum stats:", error);
+    return { totalThreads: 0, totalPosts: 0 };
+  }
+}
