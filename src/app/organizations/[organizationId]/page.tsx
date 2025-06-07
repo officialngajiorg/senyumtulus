@@ -18,6 +18,7 @@ export default async function OrganizationPage({
   params: Promise<{ organizationId: string }> 
 }) {
   const { organizationId } = await params;
+  
   const { thread, posts } = await getThreadWithPosts(organizationId);
 
   if (!thread) {

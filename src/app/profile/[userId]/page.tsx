@@ -1,7 +1,7 @@
 // src/app/profile/[userId]/page.tsx
 import UserProfile from '@/components/profile/UserProfile';
-import UserPosts from '@/components/profile/UserPosts';
 import { getUserProfileData } from '@/lib/actions/profileActions';
+import Link from 'next/link';
 
 export default async function ProfilePage({ 
   params 
@@ -9,6 +9,7 @@ export default async function ProfilePage({
   params: Promise<{ userId: string }> 
 }) {
   const { userId } = await params;
+  
   const { profile, posts } = await getUserProfileData(userId);
 
   if (!profile) {
@@ -30,7 +31,7 @@ export default async function ProfilePage({
           {posts.length === 0 ? (
             <p className="text-muted-foreground">No posts found.</p>
           ) : (
-            posts.map(post => (
+            posts.map((post: any) => (
               <div key={post.id} className="p-4 bg-secondary rounded-lg shadow-sm">
                 <h3 className="text-lg font-semibold">{post.title}</h3>
                 <p className="text-sm text-muted-foreground">{post.content.substring(0, 100)}...</p>

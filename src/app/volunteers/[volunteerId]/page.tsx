@@ -22,6 +22,7 @@ export default async function VolunteerPage({
   params: Promise<{ volunteerId: string }> 
 }) {
   const { volunteerId } = await params;
+  
   const volunteer = await getVolunteerById(volunteerId);
 
   if (!volunteer) {

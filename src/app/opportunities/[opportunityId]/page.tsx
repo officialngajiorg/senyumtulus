@@ -18,6 +18,7 @@ export default async function OpportunityPage({
   params: Promise<{ opportunityId: string }> 
 }) {
   const { opportunityId } = await params;
+  
   const { thread, posts } = await getThreadWithPosts(opportunityId);
 
   if (!thread) {
