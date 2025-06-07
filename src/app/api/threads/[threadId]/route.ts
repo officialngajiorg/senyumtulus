@@ -4,10 +4,11 @@ import { getDatabase } from '@/lib/mongodb';
 
 export async function GET(
   request: Request,
-  { params }: { params: { threadId: string } }
+  context: { params: Promise<{ threadId: string }> }
 ) {
   try {
-    const { thread, posts } = await getThreadWithPosts(params.threadId);
+    const { threadId } = await context.params;
+    const { thread, posts } = await getThreadWithPosts(threadId);
     
     if (!thread) {
       return NextResponse.json({ message: 'Thread not found' }, { status: 404 });
@@ -33,9 +34,10 @@ export async function GET(
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { threadId: string } }
+  context: { params: Promise<{ threadId: string }> }
 ) {
   try {
+    const { threadId } = await context.params;
     const body = await request.json();
     const db = await getDatabase();
     const threadsCollection = db.collection('threads');
@@ -52,7 +54,7 @@ export async function PATCH(
     }
     
     const result = await threadsCollection.updateOne(
-      { id: params.threadId },
+      { id: threadId },
       updateData
     );
     
@@ -69,17 +71,18 @@ export async function PATCH(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { threadId: string } }
+  context: { params: Promise<{ threadId: string }> }
 ) {
   try {
+    const { threadId } = await context.params;
     const db = await getDatabase();
     const threadsCollection = db.collection('threads');
     const postsCollection = db.collection('posts');
     
     // Delete thread and all its posts
     await Promise.all([
-      threadsCollection.deleteOne({ id: params.threadId }),
-      postsCollection.deleteMany({ threadId: params.threadId })
+      threadsCollection.deleteOne({ id: threadId }),
+      postsCollection.deleteMany({ threadId: threadId })
     ]);
     
     return NextResponse.json({ message: 'Thread deleted successfully' });

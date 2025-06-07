@@ -3,14 +3,15 @@ import { getDatabase } from '@/lib/mongodb';
 
 export async function GET(
   request: Request,
-  { params }: { params: { userId: string } }
+  context: { params: Promise<{ userId: string }> }
 ) {
   try {
+    const { userId } = await context.params;
     const db = await getDatabase();
     const postsCollection = db.collection('posts');
     
     const posts = await postsCollection
-      .find({ 'author.userId': params.userId })
+      .find({ 'author.userId': userId })
       .sort({ timestamp: -1 })
       .toArray();
     

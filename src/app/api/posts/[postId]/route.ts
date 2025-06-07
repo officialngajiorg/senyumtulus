@@ -3,13 +3,14 @@ import { getDatabase } from '@/lib/mongodb';
 
 export async function GET(
   request: Request,
-  { params }: { params: { postId: string } }
+  context: { params: Promise<{ postId: string }> }
 ) {
   try {
+    const { postId } = await context.params;
     const db = await getDatabase();
     const postsCollection = db.collection('posts');
     
-    const post = await postsCollection.findOne({ id: params.postId });
+    const post = await postsCollection.findOne({ id: postId });
     
     if (!post) {
       return NextResponse.json({ message: 'Post not found' }, { status: 404 });
@@ -24,9 +25,10 @@ export async function GET(
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { postId: string } }
+  context: { params: Promise<{ postId: string }> }
 ) {
   try {
+    const { postId } = await context.params;
     const body = await request.json();
     const db = await getDatabase();
     const postsCollection = db.collection('posts');
@@ -43,7 +45,7 @@ export async function PATCH(
     }
     
     const result = await postsCollection.updateOne(
-      { id: params.postId },
+      { id: postId },
       updateData
     );
     
@@ -60,13 +62,14 @@ export async function PATCH(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { postId: string } }
+  context: { params: Promise<{ postId: string }> }
 ) {
   try {
+    const { postId } = await context.params;
     const db = await getDatabase();
     const postsCollection = db.collection('posts');
     
-    const result = await postsCollection.deleteOne({ id: params.postId });
+    const result = await postsCollection.deleteOne({ id: postId });
     
     if (result.deletedCount === 0) {
       return NextResponse.json({ message: 'Post not found' }, { status: 404 });
