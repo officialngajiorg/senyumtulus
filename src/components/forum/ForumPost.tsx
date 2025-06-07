@@ -1,10 +1,10 @@
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Heart, Flag, Reply } from 'lucide-react';
 import UserAvatar from '@/components/shared/UserAvatar';
 import { format } from 'date-fns';
 import type { Post } from '@/lib/types';
+import { Badge } from '@/components/ui/badge'; // Import Badge
 
 interface ForumPostProps {
   post: Post;
@@ -43,15 +43,15 @@ export default function ForumPost({ post, isOriginalPost = false }: ForumPostPro
         </div>
         
         <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-          <Button variant="ghost" size="sm" className="h-8 px-2">
+          <Button key="like" variant="ghost" size="sm" className="h-8 px-2">
             <Heart className="h-4 w-4 mr-1" />
             {post.likes}
           </Button>
-          <Button variant="ghost" size="sm" className="h-8 px-2">
+          <Button key="reply" variant="ghost" size="sm" className="h-8 px-2">
             <Reply className="h-4 w-4 mr-1" />
             Reply
           </Button>
-          <Button variant="ghost" size="sm" className="h-8 px-2">
+          <Button key="report" variant="ghost" size="sm" className="h-8 px-2">
             <Flag className="h-4 w-4 mr-1" />
             Report
           </Button>

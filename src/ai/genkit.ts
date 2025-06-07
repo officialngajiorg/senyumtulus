@@ -1,5 +1,4 @@
-// REMOVE all real imports and initialization, only export mocks to avoid conflicts and double declaration errors
-
+// Mock AI genkit module to prevent import errors
 export const ai = {
   definePrompt: () => {},
   defineFlow: () => {}
@@ -13,7 +12,10 @@ export const z = {
     describe: () => ({})
   }),
   string: () => ({
-    describe: () => ({})
+    describe: () => ({
+      optional: () => ({})
+    }),
+    optional: () => ({})
   }),
   boolean: () => ({
     describe: () => ({})

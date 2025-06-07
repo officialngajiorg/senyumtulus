@@ -30,20 +30,19 @@ export async function POST(request: Request) {
     const postsCollection = db.collection('posts');
     const currentDate = new Date().toISOString();
     const newThreadId = generateId();
-    const newPostId = generateId();
     const newThread = {
       id: newThreadId,
       title,
       author,
       originalPostContent: content.substring(0, 200),
-      originalPostId: newPostId,
+      originalPostId: generateId(),
       createdAt: currentDate,
       lastActivity: currentDate,
       replyCount: 0,
       viewCount: 0,
     };
     const newPost = {
-      id: newPostId,
+      id: newThread.originalPostId,
       threadId: newThreadId,
       author,
       content,
