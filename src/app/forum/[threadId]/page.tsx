@@ -12,8 +12,13 @@ import { format } from 'date-fns';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { getThreadWithPosts } from '@/lib/actions/forumActions';
 
-export default async function ThreadPage({ params }: { params: { threadId: string } }) {
-  const { thread, posts } = await getThreadWithPosts(params.threadId);
+export default async function ThreadPage({ 
+  params 
+}: { 
+  params: Promise<{ threadId: string }> 
+}) {
+  const { threadId } = await params;
+  const { thread, posts } = await getThreadWithPosts(threadId);
 
   if (!thread) {
     return (
