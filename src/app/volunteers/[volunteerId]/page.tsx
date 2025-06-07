@@ -1,4 +1,3 @@
-
 // src/app/volunteers/[volunteerId]/page.tsx
 import UserAvatar from '@/components/shared/UserAvatar';
 import type { Volunteer } from '@/lib/types';
@@ -17,8 +16,13 @@ async function getVolunteerById(id: string): Promise<Volunteer | undefined> {
   return volunteers.find(v => v.id === id);
 }
 
-export default async function VolunteerProfilePage({ params }: { params: { volunteerId: string } }) {
-  const volunteer = await getVolunteerById(params.volunteerId);
+export default async function VolunteerPage({ 
+  params 
+}: { 
+  params: Promise<{ volunteerId: string }> 
+}) {
+  const { volunteerId } = await params;
+  const volunteer = await getVolunteerById(volunteerId);
 
   if (!volunteer) {
     return (
