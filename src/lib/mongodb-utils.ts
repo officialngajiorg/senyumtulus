@@ -20,14 +20,14 @@ export async function createThread(threadData: Thread): Promise<string> {
   }
 }
 
-export async function createPost(postData: Omit<Post, 'id'>): Promise<string> {
+export async function createPost(postData: Omit<Post, 'id'>, customId?: string): Promise<string> {
   try {
     const db = await getDatabase();
     const postsCollection = db.collection<Post>('posts');
     
     const newPost: Post = {
       ...postData,
-      id: generateId(),
+      id: customId || generateId(),
     };
 
     const result = await postsCollection.insertOne(newPost);

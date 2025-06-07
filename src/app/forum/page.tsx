@@ -1,5 +1,5 @@
 "use client"; 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import ThreadItem from '@/components/forum/ThreadItem';
@@ -7,6 +7,8 @@ import type { Thread } from '@/lib/types';
 import Link from 'next/link';
 import { PlusCircle, Search, MessageSquare, Loader2, Frown } from 'lucide-react';
 import { getForumThreads } from '@/lib/actions/forumActions';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import ForumThreadList from '@/components/forum/ForumThreadList';
 
 // Removed Firestore imports, will read from JSON later if needed or use client-side mock data
 

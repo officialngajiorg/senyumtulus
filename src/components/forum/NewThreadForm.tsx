@@ -1,21 +1,20 @@
-
 "use client";
 
 import React, { useEffect, useRef } from 'react';
-import { useActionState } from 'react'; // Corrected import
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { useFormState } from 'react-dom';
+import { useUser } from '@clerk/nextjs';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-// import MediaUpload from '@/components/shared/MediaUpload'; // Attachment upload deferred
+import { Label } from '@/components/ui/label';
+import { Card, CardContent } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { submitPostForModeration } from '@/lib/actions/forumActions';
-import type { PostSubmissionResult } from '@/lib/types';
-import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-import FormSubmitButton from '@/components/shared/FormSubmitButton';
-import { useAuth } from '@/contexts/AuthContext';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { useToast } from '@/hooks/use-toast';
 
 const NewThreadSchema = z.object({
   title: z.string(), // Validation for min/max length removed
@@ -30,10 +29,10 @@ type NewThreadFormValues = z.infer<typeof NewThreadSchema>;
 const initialState: PostSubmissionResult | null = null;
 
 export default function NewThreadForm() {
-  const { user, loading: authLoading } = useAuth();
-  const [state, formAction] = useActionState(submitPostForModeration, initialState);
-  const { toast } = useToast();
+  const { user } = useUser();
   const router = useRouter();
+  const [state, formAction] = useFormState(submitPostForModeration, initialState);
+  const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
 
   const form = useForm<NewThreadFormValues>({
@@ -85,79 +84,80 @@ export default function NewThreadForm() {
     }
   }, [state, toast, router, form, user]);
 
-  if (authLoading) {
-    return <p>Loading user information...</p>;
-  }
-
   if (!user) {
-    return <p>Please <a href="/login" className="underline text-primary">login</a> to create a new thread.</p>;
+    return (
+      <Alert>
+        <AlertDescription>
+          Please sign in to create a new thread.
+        </AlertDescription>
+      </Alert>
+    );
   }
 
   return (
-    <Form {...form}>
-      <form
-        ref={formRef}
-        action={formAction}
-        className="space-y-6"
-      >
-        <FormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel htmlFor="thread-title">Thread Title</FormLabel>
-              <FormControl>
-                <Input id="thread-title" placeholder="Enter a descriptive title for your thread" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+    <Card>
+      <CardContent className="p-6">
+        <Form {...form}>
+          <form
+            ref={formRef}
+            action={formAction}
+            className="space-y-4"
+          >
+            <input type="hidden" {...form.register("userId")} value={user?.id || ""} />
+            <input type="hidden" {...form.register("userName")} value={user?.name || "Anonymous"} />
+            <input type="hidden" {...form.register("userAvatarUrl")} value={user?.avatarUrl || ""} />
 
-        <FormField
-          control={form.control}
-          name="content"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel htmlFor="thread-content">Your Post Content</FormLabel>
-              <FormControl>
-                <Textarea
-                  id="thread-content"
-                  placeholder="Share details, ask questions, or start a discussion..."
-                  rows={8}
-                  className="resize-none"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <input type="hidden" {...form.register("userId")} value={user?.id || ""} />
-        <input type="hidden" {...form.register("userName")} value={user?.name || "Anonymous"} />
-        <input type="hidden" {...form.register("userAvatarUrl")} value={user?.avatarUrl || ""} />
-        
-        {/* <FormField
-          control={form.control}
-          name="attachment" // This would need proper schema and handling
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Attach File (Optional)</FormLabel>
-              <FormControl>
-                 <MediaUpload onFileChange={(file) => field.onChange(file)} idSuffix="newthread" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        /> */}
+            <div className="space-y-2">
+              <Label htmlFor="title">Thread Title</Label>
+              <Input
+                id="title"
+                name="title"
+                placeholder="Enter your thread title..."
+                required
+                className={state?.errorFields?.title ? 'border-red-500' : ''}
+                {...form.register("title")}
+              />
+              {state?.errorFields?.title && (
+                <p className="text-sm text-red-500">{state.errorFields.title}</p>
+              )}
+            </div>
 
-        <FormSubmitButton buttonText="Create Thread" pendingText="Creating..." />
+            <div className="space-y-2">
+              <Label htmlFor="content">Content</Label>
+              <Textarea
+                id="content"
+                name="content"
+                placeholder="Write your post content..."
+                rows={8}
+                required
+                className={state?.errorFields?.content ? 'border-red-500' : ''}
+                {...form.register("content")}
+              />
+              {state?.errorFields?.content && (
+                <p className="text-sm text-red-500">{state.errorFields.content}</p>
+              )}
+            </div>
 
-        {state && !state.success && state.message && !state.errorFields && (
-           <p className="text-sm font-medium text-destructive">{state.message}</p>
-        )}
-      </form>
-    </Form>
+            {state?.message && !state.success && (
+              <Alert variant="destructive">
+                <AlertDescription>{state.message}</AlertDescription>
+              </Alert>
+            )}
+
+            {state?.success && (
+              <Alert>
+                <AlertDescription className="text-green-600">
+                  {state.message}
+                </AlertDescription>
+              </Alert>
+            )}
+
+            <Button type="submit" className="w-full">
+              Create Thread
+            </Button>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
   );
 }

@@ -123,8 +123,12 @@ export async function submitPostForModeration(
 
       // Use transaction-like approach - create thread first, then post
       try {
+        console.log(`[Forum Action MongoDB] Creating thread with ID: ${newThreadId}`);
         await createThread(newThreadData);
-        await createPost(newPostData);
+        
+        console.log(`[Forum Action MongoDB] Creating post with ID: ${newPostId}`);
+        const { createPost } = await import('@/lib/mongodb-utils');
+        await createPost(newPostData, newPostId);
         
         console.log("[Forum Action MongoDB] New thread and post saved to MongoDB.");
         
