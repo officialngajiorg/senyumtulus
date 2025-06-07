@@ -45,3 +45,26 @@ export interface PostSubmissionResult {
   };
   submittedContent?: any;
 }
+
+export interface Volunteer {
+  id: string;
+  name: string;
+  avatarUrl?: string;
+  bannerUrl?: string;
+  city: string;
+  province: string;
+  bio?: string;
+  experience?: string;
+  specialization?: string[];
+  availability?: string;
+  contact?: {
+    email?: string;
+    whatsapp?: string;
+  };
+  socialMedia?: {
+    linkedin?: string;
+    twitter?: string;
+    facebook?: string;
+    instagram?: string;
+  };
+}

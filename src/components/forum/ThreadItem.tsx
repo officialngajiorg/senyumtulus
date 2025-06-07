@@ -1,5 +1,4 @@
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { MessageSquare, Eye, Clock } from 'lucide-react';
 import UserAvatar from '@/components/shared/UserAvatar';

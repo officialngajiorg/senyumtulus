@@ -1,9 +1,8 @@
-import { getDatabase } from './mongodb';
-import { ObjectId } from 'mongodb';
-import type { Thread, Post } from './types';
+import { getDatabase } from '@/lib/mongodb';
+import type { Thread, Post } from '@/lib/types';
 
 export function generateId(): string {
-  return new ObjectId().toHexString();
+  return Date.now().toString() + Math.random().toString(36).substr(2, 9);
 }
 
 export async function createThread(threadData: Thread): Promise<string> {
@@ -11,7 +10,7 @@ export async function createThread(threadData: Thread): Promise<string> {
     const db = await getDatabase();
     const threadsCollection = db.collection<Thread>('threads');
     
-    const result = await threadsCollection.insertOne(threadData);
+    await threadsCollection.insertOne(threadData);
     console.log(`[MongoDB] Thread created with ID: ${threadData.id}`);
     return threadData.id;
   } catch (error) {
@@ -30,7 +29,7 @@ export async function createPost(postData: Omit<Post, 'id'>, customId?: string):
       id: customId || generateId(),
     };
 
-    const result = await postsCollection.insertOne(newPost);
+    await postsCollection.insertOne(newPost);
     console.log(`[MongoDB] Post created with ID: ${newPost.id}`);
     return newPost.id;
   } catch (error) {
@@ -42,21 +41,16 @@ export async function createPost(postData: Omit<Post, 'id'>, customId?: string):
 export async function updateThreadActivity(threadId: string, lastActivity: string): Promise<void> {
   try {
     const db = await getDatabase();
-    const threadsCollection = db.collection<Thread>('threads');
+    const threadsCollection = db.collection('threads');
     
-    const result = await threadsCollection.updateOne(
+    await threadsCollection.updateOne(
       { id: threadId },
       { 
         $set: { lastActivity },
         $inc: { replyCount: 1 }
       }
     );
-    
-    if (result.matchedCount === 0) {
-      console.warn(`[MongoDB] Thread with ID ${threadId} not found for update`);
-    } else {
-      console.log(`[MongoDB] Thread ${threadId} activity updated`);
-    }
+    console.log(`[MongoDB] Thread ${threadId} activity updated`);
   } catch (error) {
     console.error('[MongoDB] Error updating thread activity:', error);
     throw new Error('Failed to update thread activity');
@@ -69,10 +63,11 @@ export async function getThreadById(threadId: string): Promise<Thread | null> {
     const threadsCollection = db.collection<Thread>('threads');
     
     const thread = await threadsCollection.findOne({ id: threadId });
+    console.log(`[MongoDB] Retrieved thread ${threadId}: ${thread ? 'found' : 'not found'}`);
     return thread;
   } catch (error) {
     console.error('[MongoDB] Error getting thread by ID:', error);
-    throw new Error('Failed to get thread from database');
+    return null;
   }
 }
 
@@ -101,23 +96,5 @@ export async function getPostsByThreadId(threadId: string): Promise<Post[]> {
   } catch (error) {
     console.error('[MongoDB] Error getting posts by thread ID:', error);
     return [];
-  }
-}
-
-export async function getThreadStats(): Promise<{ totalThreads: number; totalPosts: number }> {
-  try {
-    const db = await getDatabase();
-    const threadsCollection = db.collection<Thread>('threads');
-    const postsCollection = db.collection<Post>('posts');
-    
-    const [totalThreads, totalPosts] = await Promise.all([
-      threadsCollection.countDocuments(),
-      postsCollection.countDocuments()
-    ]);
-    
-    return { totalThreads, totalPosts };
-  } catch (error) {
-    console.error('[MongoDB] Error getting thread stats:', error);
-    return { totalThreads: 0, totalPosts: 0 };
   }
 }

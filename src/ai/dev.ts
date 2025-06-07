@@ -9,5 +9,5 @@ import {getFlows} from 'genkit/dev';
 // This is a simple way to export flows for the dev server.
 // You could also export them directly from their respective files.
 export default {
-  '/flows': getFlows(),
+  '/flows': {},
 };

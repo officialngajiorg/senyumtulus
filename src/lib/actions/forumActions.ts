@@ -94,7 +94,7 @@ export async function submitPostForModeration(
     // Content is appropriate, save to MongoDB
     const currentDate = new Date().toISOString();
 
-    if (isNewThread && validatedFields.data.title) { // New Thread
+    if (isNewThread && 'title' in validatedFields.data && validatedFields.data.title) { // New Thread
       console.log("[Forum Action MongoDB] Attempting to save new thread to MongoDB...");
       
       const newThreadId = generateId();
@@ -149,8 +149,8 @@ export async function submitPostForModeration(
         throw new Error(`Database operation failed: ${dbError.message}`);
       }
 
-    } else if (!isNewThread && (validatedFields.data as any).threadId) { // New Reply
-      const threadId = (validatedFields.data as any).threadId;
+    } else if (!isNewThread && 'threadId' in validatedFields.data && validatedFields.data.threadId) { // New Reply
+      const threadId = validatedFields.data.threadId;
       console.log(`[Forum Action MongoDB] Attempting to save new reply to thread ${threadId} in MongoDB...`);
       
       const newReplyData: Omit<Post, 'id'> = {
@@ -176,7 +176,7 @@ export async function submitPostForModeration(
           success: true,
           message: 'Reply submitted successfully!',
           moderation: moderationResult,
-          submittedContent: { ...validatedFields.data, threadId: (validatedFields.data as any).threadId || undefined },
+          submittedContent: { ...validatedFields.data, threadId: validatedFields.data.threadId || undefined },
         };
       } catch (dbError: any) {
         console.error("[Forum Action MongoDB] Database error creating reply:", dbError);

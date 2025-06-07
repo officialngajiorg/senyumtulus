@@ -9,11 +9,30 @@ import { ArrowLeft, Mail, Phone, MapPin, Briefcase, Users, Globe, MessageCircle,
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { readJsonFile } from '@/lib/json-utils'; // Using JSON utils
 
+// Replace with MongoDB or mock data
 async function getVolunteerById(id: string): Promise<Volunteer | undefined> {
-  const volunteers = readJsonFile<Volunteer>('volunteers.json');
-  return volunteers.find(v => v.id === id);
+  // TODO: Replace with MongoDB query
+  // Example mock data:
+  return {
+    id,
+    name: "Volunteer Name",
+    avatarUrl: "",
+    bannerUrl: "",
+    city: "City",
+    province: "Province",
+    bio: "This is a volunteer bio.",
+    experience: "Experience details.",
+    specialization: ["Education", "Health"],
+    availability: "Weekends",
+    contact: { email: "volunteer@example.com", whatsapp: "08123456789" },
+    socialMedia: {
+      linkedin: "",
+      twitter: "",
+      facebook: "",
+      instagram: ""
+    }
+  };
 }
 
 export default async function VolunteerPage({ 
@@ -43,7 +62,7 @@ export default async function VolunteerPage({
 
   const SocialIcon = ({ platform, url }: { platform: string, url: string }) => {
     let IconComponent;
-    switch (platform.toLowerCase()) { // ensure consistent casing
+    switch (platform.toLowerCase()) {
       case 'linkedin': IconComponent = Linkedin; break;
       case 'twitter': IconComponent = Twitter; break;
       case 'facebook': IconComponent = Facebook; break;

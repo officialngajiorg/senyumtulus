@@ -9,7 +9,6 @@
  * - ModerateForumContentOutput - The output type for the moderateForumContent function.
  */
 
-import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const ModerateForumContentInputSchema = z.object({
@@ -88,20 +87,25 @@ const moderateForumContentFlow = ai.defineFlow(
 );
 
 // Simple content moderation function
+export interface ModerateForumContentInput {
+  content: string;
+}
+
+interface ModerateForumContentResult {
+  isAppropriate: boolean;
+  reason?: string;
+  score?: number;
+}
+
+// Simple content moderation function
 export async function moderateForumContent(input: ModerateForumContentInput): Promise<ModerateForumContentResult> {
   try {
-    // Get content from input
     const { content } = input;
-    
-    // List of offensive/inappropriate terms (very basic implementation)
     const inappropriateTerms = [
       'profanity', 'offensive', 'inappropriate'
     ];
-
-    // Check for inappropriate content
     const lowerContent = content.toLowerCase();
     const foundTerms = inappropriateTerms.filter(term => lowerContent.includes(term));
-    
     if (foundTerms.length > 0) {
       return {
         isAppropriate: false,
@@ -109,15 +113,12 @@ export async function moderateForumContent(input: ModerateForumContentInput): Pr
         score: 0.8
       };
     }
-    
-    // If no issues found, the content is appropriate
     return {
       isAppropriate: true,
       score: 0.2
     };
   } catch (error) {
     console.error('Error in content moderation:', error);
-    // Default to appropriate in case of error, but log it
     return {
       isAppropriate: true, 
       reason: 'Moderation service error, approved by default'

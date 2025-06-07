@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { useFormState } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -15,7 +15,6 @@ interface NewReplyFormProps {
 
 export default function NewReplyForm({ threadId }: NewReplyFormProps) {
   const [state, formAction] = useFormState(submitPostForModeration, null);
-  const formRef = useRef<HTMLFormElement>(null);
 
   // Hardcode user for testing - replace with your auth system
   const user = {
@@ -30,11 +29,7 @@ export default function NewReplyForm({ threadId }: NewReplyFormProps) {
         <CardTitle>Post a Reply</CardTitle>
       </CardHeader>
       <CardContent>
-        <form
-          ref={formRef}
-          action={formAction}
-          className="space-y-4"
-        >
+        <form action={formAction} className="space-y-4">
           <input type="hidden" name="threadId" value={threadId} />
           <input type="hidden" name="userId" value={user.id} />
           <input type="hidden" name="userName" value={user.fullName || 'Anonymous'} />
