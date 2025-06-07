@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
@@ -9,79 +8,74 @@ import type { User } from '@/lib/types'; // Use our User type
 
 interface AuthContextType {
   user: User | null;
-  loading: boolean;
-  login: (name: string) => Promise<void>; // Simplified login
-  signup: (name: string) => Promise<void>; // Simplified signup
+  login: (name: string) => Promise<void>;
   logout: () => Promise<void>;
+  isLoading: boolean;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  login: async () => {},
+  logout: async () => {},
+  isLoading: false,
+});
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+export const useAuth = () => useContext(AuthContext);
+
+interface AuthProviderProps {
+  children: React.ReactNode;
+}
+
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true); // Still useful for initial load
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    // Try to load user from localStorage for a very basic persistence
-    const storedUser = localStorage.getItem('senyumtulus-user');
+    // Mock authentication check - replace with your actual auth check
+    const storedUser = localStorage.getItem('user');
     if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (e) {
-        localStorage.removeItem('senyumtulus-user');
-      }
+      setUser(JSON.parse(storedUser));
     }
-    setLoading(false);
+    setIsLoading(false);
   }, []);
 
   const login = async (name: string) => {
-    setLoading(true);
-    // In a real JSON backend, you might read users.json here.
-    // For simplicity, we'll create a mock user or find one.
-    // This is NOT secure and only for demonstration.
-    const mockUser: User = {
-      id: `user-${name.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`,
+    // Mock login - replace with your actual authentication logic
+    const newUser: User = {
+      id: 'mock-user-id',
       name: name,
-      avatarUrl: `https://placehold.co/100x100.png?text=${name.substring(0,2).toUpperCase()}`,
-      email: `${name.toLowerCase().replace(/\s+/g, '.')}@example.com`
+      email: `${name.toLowerCase().replace(/\s/g, '')}@example.com`,
+      image: '',
     };
-    setUser(mockUser);
-    localStorage.setItem('senyumtulus-user', JSON.stringify(mockUser));
-    setLoading(false);
-  };
-  
-  const signup = async (name: string) => {
-    // Similar to login for this mock setup
-    await login(name); 
+    localStorage.setItem('user', JSON.stringify(newUser));
+    setUser(newUser);
+    router.push('/');
   };
 
   const logout = async () => {
+    // Mock logout - replace with your actual logout logic
+    localStorage.removeItem('user');
     setUser(null);
-    localStorage.removeItem('senyumtulus-user');
-    router.push('/'); 
+    router.push('/login');
   };
 
-  if (loading && !user) { // Show loader only if truly loading and no user yet
-    // This simple loader for context might be too intrusive.
-    // We can rely on page-level loaders for initial data fetching if this causes issues.
-    // For now, keeping it to show context is loading.
-    // Consider removing this full-page loader if it's disruptive.
-    // setLoading(false) happens quickly now.
-  }
-
+  const value: AuthContextType = {
+    user,
+    login,
+    logout,
+    isLoading,
+  };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout }}>
-      {children}
+    <AuthContext.Provider value={value}>
+      {isLoading ? (
+        <div className="flex items-center justify-center h-screen">
+          <Loader2 className="mr-2 h-6 w-6 animate-spin" /> Loading...
+        </div>
+      ) : (
+        children
+      )}
     </AuthContext.Provider>
   );
-};
-
-export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
 };
