@@ -1,10 +1,10 @@
 import type { Volunteer } from '@/lib/types';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import UserAvatar from '@/components/shared/UserAvatar';
 import { Button } from '@/components/ui/button';
 import { Mail, Phone, MapPin, Briefcase, Users } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import UserAvatar from '@/components/shared/UserAvatar';
 
 interface VolunteerCardProps {
   volunteer: Volunteer;
@@ -15,7 +15,7 @@ export default function VolunteerCard({ volunteer }: VolunteerCardProps) {
     <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200 ease-in-out flex flex-col h-full">
       <CardHeader className="pb-3">
         <div className="flex items-start space-x-4">
-          <UserAvatar user={{ name: volunteer.name, avatarUrl: volunteer.avatarUrl }} className="h-16 w-16" />
+          <UserAvatar user={{ name: volunteer.name, avatarUrl: volunteer.avatarUrl, id: volunteer.id }} className="h-16 w-16" />
           <div className="flex-1">
             <CardTitle className="text-xl font-headline">
               <Link href={`/volunteers/${volunteer.id}`} className="hover:text-primary transition-colors">
