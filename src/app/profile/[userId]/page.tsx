@@ -24,7 +24,6 @@ export default async function ProfilePage({
   return (
     <div className="space-y-6">
       <UserProfile profile={profile} />
-      
       <div className="bg-card p-4 rounded-lg shadow">
         <h2 className="text-xl font-semibold">Posts by {profile.name}</h2>
         <div className="space-y-4">
