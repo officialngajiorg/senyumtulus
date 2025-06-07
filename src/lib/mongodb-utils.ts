@@ -86,7 +86,7 @@ export async function getAllThreads(): Promise<Thread[]> {
     return threads;
   } catch (error) {
     console.error('[MongoDB] Error getting all threads:', error);
-    throw new Error('Failed to get threads from database');
+    return [];
   }
 }
 
@@ -100,7 +100,7 @@ export async function getPostsByThreadId(threadId: string): Promise<Post[]> {
     return posts;
   } catch (error) {
     console.error('[MongoDB] Error getting posts by thread ID:', error);
-    throw new Error('Failed to get posts from database');
+    return [];
   }
 }
 

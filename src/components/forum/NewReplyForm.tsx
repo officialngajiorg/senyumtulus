@@ -1,154 +1,79 @@
-
 "use client";
 
 import React, { useEffect, useRef } from 'react';
-import { useActionState } from 'react'; // Corrected import
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { useFormState } from 'react-dom';
+import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-// import MediaUpload from '@/components/shared/MediaUpload'; // Attachment upload deferred
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { submitPostForModeration } from '@/lib/actions/forumActions';
-import type { PostSubmissionResult } from '@/lib/types';
-import { useToast } from '@/hooks/use-toast';
-import FormSubmitButton from '@/components/shared/FormSubmitButton';
-import { useAuth } from '@/contexts/AuthContext';
-
-const ReplySchema = z.object({
-  content: z.string().min(5, "Reply must be at least 5 characters long.").max(5000, "Reply cannot exceed 5000 characters."),
-  userId: z.string().min(1, "User ID is required."),
-  userName: z.string().min(1, "User name is required."),
-  userAvatarUrl: z.string().url().optional().or(z.literal('')),
-  threadId: z.string().min(1, "Thread ID is required."),
-});
-
-type ReplyFormValues = z.infer<typeof ReplySchema>;
 
 interface NewReplyFormProps {
   threadId: string;
-  onReplySubmitted?: () => void;
 }
 
-const initialState: PostSubmissionResult | null = null;
-
-export default function NewReplyForm({ threadId, onReplySubmitted }: NewReplyFormProps) {
-  const { user, loading: authLoading } = useAuth();
-  const [state, formAction] = useActionState(submitPostForModeration, initialState);
-  const { toast } = useToast();
+export default function NewReplyForm({ threadId }: NewReplyFormProps) {
+  const [state, formAction] = useFormState(submitPostForModeration, null);
   const formRef = useRef<HTMLFormElement>(null);
 
-  const form = useForm<ReplyFormValues>({
-    resolver: zodResolver(ReplySchema),
-    defaultValues: {
-      content: "",
-      userId: user?.uid || "",
-      userName: user?.displayName || "Anonymous",
-      userAvatarUrl: user?.photoURL || "",
-      threadId: threadId,
-    },
-  });
-
-  useEffect(() => {
-    if (user) {
-      form.setValue('userId', user.uid);
-      form.setValue('userName', user.displayName || 'Anonymous');
-      form.setValue('userAvatarUrl', user.photoURL || '');
-    }
-    form.setValue('threadId', threadId);
-  }, [user, form, threadId]);
-
-  useEffect(() => {
-    if (state?.success) {
-      toast({
-        title: "Success!",
-        description: state.message,
-      });
-      form.reset({ 
-        content: '', 
-        userId: user?.uid || '', 
-        userName: user?.displayName || 'Anonymous', 
-        userAvatarUrl: user?.photoURL || '', 
-        threadId: threadId 
-      });
-      formRef.current?.reset();
-      if (onReplySubmitted) {
-        onReplySubmitted();
-      }
-    } else if (state && !state.success && state.message) {
-      toast({
-        title: "Error",
-        description: state.message,
-        variant: "destructive",
-      });
-      if (state.errorFields?.content) {
-        form.setError("content", { type: "server", message: state.errorFields.content });
-      }
-    }
-  }, [state, toast, form, onReplySubmitted, user, threadId]);
-
-  if (authLoading) {
-    return <p>Loading user information...</p>;
-  }
-
-  if (!user) {
-    return <p>Please <a href="/login" className="underline text-primary">login</a> to reply.</p>;
-  }
+  // Hardcode user for testing - replace with your auth system
+  const user = {
+    id: 'test-user-123',
+    fullName: 'Test User',
+    imageUrl: ''
+  };
 
   return (
-    <Form {...form}>
-      <form
-        ref={formRef}
-        action={formAction}
-        // onSubmit prop removed to rely on native form action with RHF validation
-        className="space-y-6 p-4 border rounded-lg shadow-sm bg-card mt-6"
-      >
-        <h3 className="text-xl font-semibold font-headline">Post a Reply</h3>
-        <FormField
-          control={form.control}
-          name="content"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel htmlFor="reply-content">Your Reply</FormLabel>
-              <FormControl>
-                <Textarea
-                  id="reply-content"
-                  placeholder="Share your thoughts..."
-                  rows={5}
-                  className="resize-none"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <input type="hidden" {...form.register("userId")} />
-        <input type="hidden" {...form.register("userName")} />
-        <input type="hidden" {...form.register("userAvatarUrl")} />
-        <input type="hidden" {...form.register("threadId")} />
-        
-        {/* <FormField
-          control={form.control}
-          name="attachment" // Requires schema update and handling
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Attach File (Optional)</FormLabel>
-              <FormControl>
-                 <MediaUpload onFileChange={(file) => field.onChange(file)} idSuffix="reply" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        /> */}
-        
-        <FormSubmitButton buttonText="Submit Reply" pendingText="Submitting..." />
+    <Card>
+      <CardHeader>
+        <CardTitle>Post a Reply</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form
+          ref={formRef}
+          action={formAction}
+          className="space-y-4"
+        >
+          <input type="hidden" name="threadId" value={threadId} />
+          <input type="hidden" name="userId" value={user.id} />
+          <input type="hidden" name="userName" value={user.fullName || 'Anonymous'} />
+          <input type="hidden" name="userAvatarUrl" value={user.imageUrl || ''} />
 
-        {state && !state.success && state.message && !state.errorFields && (
-          <p className="text-sm font-medium text-destructive">{state.message}</p>
-        )}
-      </form>
-    </Form>
+          <div className="space-y-2">
+            <Label htmlFor="content">Your Reply</Label>
+            <Textarea
+              id="content"
+              name="content"
+              placeholder="Write your reply..."
+              rows={6}
+              required
+              className={state?.errorFields?.content ? 'border-red-500' : ''}
+            />
+            {state?.errorFields?.content && (
+              <p className="text-sm text-red-500">{state.errorFields.content}</p>
+            )}
+          </div>
+
+          {state?.message && !state.success && (
+            <Alert variant="destructive">
+              <AlertDescription>{state.message}</AlertDescription>
+            </Alert>
+          )}
+
+          {state?.success && (
+            <Alert>
+              <AlertDescription className="text-green-600">
+                {state.message}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          <Button type="submit" className="w-full">
+            Post Reply
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }
